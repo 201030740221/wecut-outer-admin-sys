@@ -1,0 +1,10 @@
+.DS_Store
+.eslintignore
+.eslintrc
+.gitignore.swp
+.jshintignore
+.jshintrc
+app/.DS_Store
+node_modules
+app/components/.DS_Store
+app/components/publish/.DS_Store
