@@ -2,7 +2,8 @@ import {Router, Route, IndexRoute, useRouterHistory} from 'react-router';
 import { Upload,Transfer,message,Icon,Table,Form, Select,Input, Row, Col, Modal, Button,Tag } from 'antd';
 const FormItem = Form.Item;
 
-import BaseForm from '../../common/base-form';
+//import BaseForm from '../../common/base-form';
+import TagsMultSelect from '../../common/tags-mult-select';
 
 var FormSearch = React.createClass({
    getInitialState: function () {
@@ -175,10 +176,8 @@ var Uploader = React.createClass({
         wrapperCol: { span: 14 },
       };
 
-    let  tagList = this.props.tagList||[];
-
     return (
-      <Row className="">
+      <Row className="account_header">
         <Col span="6">
           <Upload {...props} fileList={fileList}>
               <Icon type="plus" />
@@ -188,6 +187,7 @@ var Uploader = React.createClass({
         <Col span="18">
         {
           fileList.map((item,key)=>{
+            let log=key;
             let del_node = (
                 <div className="del_btn" onClick={self.delHandle.bind(null,key)}>删除</div>
             ) ;
@@ -213,22 +213,7 @@ var Uploader = React.createClass({
                      <FormItem
                        {...formItemLayout}
                        label="标签：">
-                       <Select
-                          showSearch
-                          id="tagid"
-                          defaultValue='1'
-                          placeholder=""
-                          style={{ width: '100%' }}
-                          onChange={self.tagChange.bind(null,key)}
-                          >
-                         {
-                           tagList.map((_item,_key)=>{
-                             return(
-                               <Option value={_item.tagid} key={_key}>{_item.name}</Option>
-                             )
-                           })
-                         }
-                       </Select>
+                       <TagsMultSelect log={log} tagChange={self.tagChange} />
                      </FormItem>
                     </Form>
                   </Col>
@@ -258,7 +243,7 @@ var TagIndex = React.createClass({
   getInitialState: function () {
         return {
           data: [],
-          pagination: { pageSize:20, showQuickJumper:true },
+          pagination: { pageSize:20, showQuickJumper:true ,totalItem:null},
           loading: false,
           fileList:[],
           firstLevelTag: [],
@@ -271,8 +256,6 @@ var TagIndex = React.createClass({
 
           record: {},
           visible: false,
-
-          tagList:[],
 
           accountList: []
         };
@@ -326,6 +309,7 @@ var TagIndex = React.createClass({
             loading: false,
             data: result.data,
             pagination,
+            totalItem: result.totalItem
           });
         }else{
           self.setState({
@@ -338,31 +322,6 @@ var TagIndex = React.createClass({
   },
   componentDidMount() {
     this.fetch();
-
-    let self = this;
-    let _parmas = {};
-
-    if(localStorage.getItem('adminId')){
-      _parmas.adminId = localStorage.getItem('adminId');
-    }
-
-    reqwest({
-      url: apiConfig.apiHost+'/cms/publish/taglist.php',
-      method: 'post',
-      data: _parmas,
-      type: 'json',
-      success: (res) => {
-        if(res.code){
-          self.setState({
-            tagList: res.data
-          })
-        }else{
-           message.error(result.msg);
-        }
-
-      }
-    });
-
   },
   onSearch(){
     let _val = $('.search_input').val();
@@ -449,10 +408,6 @@ var TagIndex = React.createClass({
         message.warn('用户昵称不能为空');
         log = true;
       }
-      if(!_item.sintro){
-        message.warn('用户介绍不能为空');
-        log = true;
-      }
     })
     if(log){
       return;
@@ -464,7 +419,7 @@ var TagIndex = React.createClass({
         avatar: _item.url,
         uname: _item.uname,
         sintro: _item.sintro,
-        tagid: _item.tagid
+        tagid: _item.tagid||1
       });
     })
 
@@ -520,8 +475,8 @@ var TagIndex = React.createClass({
     //this.context.router.push('/publish/account/edit');
     this.showModal({});
   },
-  edit(){
-    message.error('该功能暂未开放');
+  edit(uid){
+    this.context.router.push('/publish/account/edit/'+uid);
   },
 
   addAccount(){
@@ -583,12 +538,10 @@ var TagIndex = React.createClass({
       dataIndex: '',
       render(text,record){
         return (
-            <a href="javascript:;" onClick={self.edit}>编辑</a>
+            <a href="javascript:;" onClick={self.edit.bind(null,record.uid)}>编辑</a>
           )
       }
     }];
-
-    let tagList = this.state.tagList;
 
     return (
       <div className="right-container">
@@ -607,6 +560,7 @@ var TagIndex = React.createClass({
           bordered
           rowKey={record => record.uid}
           />
+          <span className="total_show">共 {this.state.totalItem} 条记录</span>
 
            <Modal title="新增账号"
             visible={this.state.visible}
@@ -614,12 +568,11 @@ var TagIndex = React.createClass({
             confirmLoading={this.state.confirmLoading}
             onCancel={this.handleCancel}>
             <div style={{maxHeight: '450',overflow:'auto'}}>
-            <Uploader
-              onUploaderChange={self.onUploaderChange}
-              tagList={tagList}
-              tagChange={self.tagChange}
-              delHandle={self.delHandle}
-              />
+              <Uploader
+                onUploaderChange={self.onUploaderChange}
+                tagChange={self.tagChange}
+                delHandle={self.delHandle}
+                />
             </div>
           </Modal>
       </div>

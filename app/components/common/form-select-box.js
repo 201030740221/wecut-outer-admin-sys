@@ -7,7 +7,7 @@ var FormSelectBox = React.createClass({
          data:[],
          record: [],
          visible: false,
-         pagination: { pageSize:10, showQuickJumper:true },
+         pagination: { pageSize:20, showQuickJumper:true },
           selectedRowKeys: [],  // 这里配置默认勾选列
           loading: false,
         };
@@ -38,7 +38,7 @@ var FormSelectBox = React.createClass({
         type: 'json',
         success: (result) => {
           const pagination = self.state.pagination;
-          pagination.total = result.totalPage*pagination.pageSize;
+          pagination.total = result.totalIndex*pagination.pageSize;
            let channels = result.data.channels;
             channels.forEach((item)=>{
               item.key = item.chid;
@@ -59,8 +59,8 @@ var FormSelectBox = React.createClass({
         pagination: pager,
       });
       this.fetch({
-        pageSize: pagination.pageSize,
-        page: pagination.current
+        searchtext: $('#keyword').val(),
+        index: pagination.current
       });
     },
     searchChangeHandle(e){
@@ -143,7 +143,7 @@ var FormSelectBox = React.createClass({
                 onCancel={this.handleCancel}>
                <div style={{height:'400',overflow:'auto'}}>
                   <div style={{ marginBottom: 16 }}>
-                      <Input placeholder="搜索关键字" onChange={this.searchChangeHandle} />
+                      <Input id="keyword" placeholder="搜索关键字" onChange={this.searchChangeHandle} />
                      <span style={{ marginLeft: 8 }}>{hasSelected ? `选择了 ${selectedRowKeys.length} 个对象` : ''}</span>
                   </div>
                   <Table
@@ -153,6 +153,8 @@ var FormSelectBox = React.createClass({
                     pagination={this.state.pagination}
                     loading={this.state.loading}
                     onChange={this.handleTableChange}
+                    bordered
+                    rowKey={record => record.chid}
                     />
                 </div>
               </Modal>

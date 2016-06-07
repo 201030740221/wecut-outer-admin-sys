@@ -20,6 +20,7 @@ import PublishContentView from './components/publish/content/view';
 
 //发布账号管理
 import PublishAccountList from './components/publish/account/list';
+import PublishAccountEdit from './components/publish/account/edit';
 
 
 // 登录验证
@@ -55,6 +56,7 @@ var routes = (
           <Route onEnter={requireAuth} path="publish" breadcrumbName="发布账号管理">
             <IndexRoute component={PublishAccountList}/>
             <Route onEnter={requireAuth} component={PublishAccountList} path="account/list" breadcrumbName="账号列表"/>
+            <Route onEnter={requireAuth} component={PublishAccountEdit} path="account/edit/:id" breadcrumbName="账号编辑"/>
           </Route>
 
       </Route>

@@ -7,7 +7,7 @@ const FormItem = Form.Item;
 var FormSearch = React.createClass({
    getInitialState: function () {
         return {
-         
+
 
         };
   },
@@ -36,8 +36,8 @@ var FormSearch = React.createClass({
           <Row>
             <Col span="10">
               <div span="12" className='fl'>
-               <Select 
-                  defaultValue="-1" 
+               <Select
+                  defaultValue="-1"
                   onChange={this.handleChange.bind(null,'search_type')}
                   style={{width:'120'}}
                   >
@@ -52,8 +52,8 @@ var FormSearch = React.createClass({
               </div>
             </Col>
             <Col span="3" style={{marginLeft:'10'}}>
-               <Select  
-                  defaultValue="-1" 
+               <Select
+                  defaultValue="-1"
                   onChange={this.handleChange.bind(null,'search_channel')}
                   style={{width:'120'}}
                >
@@ -63,9 +63,9 @@ var FormSearch = React.createClass({
                 </Select>
             </Col>
             <Col span="3" style={{marginLeft:'10'}}>
-               <Select 
-                  className="search_channel" 
-                  defaultValue="-1" 
+               <Select
+                  className="search_channel"
+                  defaultValue="-1"
                   onChange={this.handleChange.bind(null,'has_tag')}
                   style={{width:'120'}}
                >
@@ -96,7 +96,8 @@ var TagIndex = React.createClass({
   getInitialState: function () {
         return {
           data: [],
-          pagination: { pageSize:20, showQuickJumper:true },
+          pagination: { pageSize:20,total:20},
+          totalItem: 20,
           loading: false,
           firstLevelTag: [],
           secondLevelTag: [],
@@ -131,6 +132,7 @@ var TagIndex = React.createClass({
 
     this.fetch(_parmas);
   },
+
   fetch(params = {}) {
 
     let self = this;
@@ -146,7 +148,7 @@ var TagIndex = React.createClass({
       data: params,
       type: 'json',
       success: (result) => {
-        const pagination = self.state.pagination;
+        let pagination = self.state.pagination;
         pagination.total = result.totalIndex*pagination.pageSize;
 
         //let firstLevelTag = result.data.firstLevelTag;
@@ -156,13 +158,14 @@ var TagIndex = React.createClass({
             loading: false,
             data: result.data.task,
             pagination,
+            totalItem: result.totalItem
           });
         }else{
           self.setState({
             loading: false
           });
         }
-       
+
       }
     });
   },
@@ -192,22 +195,22 @@ var TagIndex = React.createClass({
     let which = arguments[0],
         val = arguments[1];
     switch(which){
-      case 'search_type': 
+      case 'search_type':
           this.setState({
             searchtype: val
           })
           break;
-      case 'search_channel': 
+      case 'search_channel':
           this.setState({
             isrec: val
           })
           break;
-      case 'tag_type': 
+      case 'tag_type':
           this.setState({
             tagid: val
           })
           break;
-      case 'has_tag': 
+      case 'has_tag':
           this.setState({
             istag: val
           })
@@ -255,12 +258,12 @@ var TagIndex = React.createClass({
               data: _data
             })
 
-            
+
           }else{
             message.error(res.msg);
           }
         }
-      }); 
+      });
   },
 
   render() {
@@ -321,21 +324,22 @@ var TagIndex = React.createClass({
 
     return (
       <div className="right-container">
-        <FormSearch 
+        <FormSearch
           onSearch={this.onSearch}
           changeHandle={this.changeHandle}
           addPublish={this.addPublish}
         />
-        <Table 
+        <Table
           showHeader
           columns={columns}
           dataSource={this.state.data}
           pagination={this.state.pagination}
           loading={this.state.loading}
-          onChange={this.handleTableChange} 
+          onChange={this.handleTableChange}
           bordered
           rowKey={record => record.pid}
           />
+          <span className="total_show">共 {this.state.totalItem} 条记录</span>
       </div>
     );
   }
