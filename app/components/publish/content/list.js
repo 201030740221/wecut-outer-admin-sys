@@ -8,7 +8,6 @@ var FormSearch = React.createClass({
    getInitialState: function () {
         return {
 
-
         };
   },
   search(){
@@ -31,49 +30,60 @@ var FormSearch = React.createClass({
   },
   render(){
 
+    let tstatus = this.props.tstatus, taskadminIds = this.props.taskadminIds;
+    var taskadminIds_node = '';
+    if(taskadminIds.length>0){
+      taskadminIds_node = (
+        <Col span="3" style={{marginLeft:'10'}}>
+           <Select
+              defaultValue={this.props.taskadminId+''}
+              onChange={this.handleChange.bind(null,'taskadminId')}
+              style={{width:'120'}}
+           >
+              <Option value='-1'>全部管理</Option>
+              {
+                taskadminIds.map((item,key)=>{
+                  return (
+                    <Option key={key} value={item.taskadminId+''}>{item.name}</Option>
+                  )
+                })
+              }
+            </Select>
+        </Col>
+      )
+    }else{
+      taskadminIds_node = '';
+    }
+
+    var taskstatus_node = '';
+    if(tstatus.length>0){
+      taskstatus_node = (
+        <Col span="3" style={{marginLeft:'10'}}>
+           <Select
+              defaultValue={this.props.taskstatus+''}
+              onChange={this.handleChange.bind(null,'taskstatus')}
+              style={{width:'120'}}
+           >
+              <Option value='-1'>全部状态</Option>
+              {
+                tstatus.map((item,key)=>{
+                  return (
+                    <Option key={key} value={item.taskstatus+""}>{item.status}</Option>
+                  )
+                })
+              }
+            </Select>
+        </Col>
+      )
+    }else{
+      taskstatus_node = '';
+    }
+
     return (
        <div style={{marginBottom:'20'}}>
           <Row>
-            <Col span="10">
-              <div span="12" className='fl'>
-               <Select
-                  defaultValue="-1"
-                  onChange={this.handleChange.bind(null,'search_type')}
-                  style={{width:'120'}}
-                  >
-                  <Option value="-1">频道类型</Option>
-                  <Option value="1">频道名</Option>
-                  <Option value="2">频道ID</Option>
-                  <Option value="3">频道主ID</Option>
-                </Select>
-              </div>
-              <div span="12" className='fl'>
-                <Input className="search_input" placeholder="please enter..." style={{marginLeft:'10'}} />
-              </div>
-            </Col>
-            <Col span="3" style={{marginLeft:'10'}}>
-               <Select
-                  defaultValue="-1"
-                  onChange={this.handleChange.bind(null,'search_channel')}
-                  style={{width:'120'}}
-               >
-                  <Option value="-1">全部频道</Option>
-                  <Option value="1">推荐频道</Option>
-                  <Option value="0">非推荐频道</Option>
-                </Select>
-            </Col>
-            <Col span="3" style={{marginLeft:'10'}}>
-               <Select
-                  className="search_channel"
-                  defaultValue="-1"
-                  onChange={this.handleChange.bind(null,'has_tag')}
-                  style={{width:'120'}}
-               >
-                  <Option value="-1">全部标签</Option>
-                  <Option value="1">有标签</Option>
-                  <Option value="0">无标签</Option>
-                </Select>
-            </Col>
+            {taskadminIds_node}
+            {taskstatus_node}
           </Row>
           <Row className="u-mt-20">
             <Col span="12" style={{ textAlign: 'left' }}>
@@ -101,11 +111,11 @@ var TagIndex = React.createClass({
           loading: false,
           firstLevelTag: [],
           secondLevelTag: [],
+          taskadminIds: [],
+          tstatus: [],
 
-          searchtype: -1,
-          isrec: -1,
-          tagid:-1,
-          istag: -1
+          taskadminId: -1,
+          taskstatus: -1
         };
   },
   handleTableChange(pagination) {
@@ -115,18 +125,12 @@ var TagIndex = React.createClass({
       pagination: pager,
     });
 
-    let _val = $('.search_input').val();
-    let searchtype = this.state.searchtype,
-        searchtext = _val,
-        isrec  = this.state.isrec ,
-        tagid = this.state.tagid,
-        istag = this.state.istag;
+    let taskadminId = this.state.taskadminId,
+        taskstatus  = this.state.taskstatus;
+
     let _parmas = {
-      searchtype: +searchtype,
-      searchtext: searchtext||null,
-      isrec: +isrec,
-      tagid: +tagid,
-      istag: +istag,
+      taskadminId: +taskadminId,
+      taskstatus: taskstatus,
       index: pagination.current
     }
 
@@ -152,20 +156,15 @@ var TagIndex = React.createClass({
         pagination.total = result.totalIndex*pagination.pageSize;
 
         //let firstLevelTag = result.data.firstLevelTag;
-        let _arr = result.data.task;
-        if(result.data.task.length>0){
-           self.setState({
-            loading: false,
-            data: result.data.task,
-            pagination,
-            totalItem: result.totalItem
-          });
-        }else{
-          self.setState({
-            loading: false
-          });
-        }
+        self.setState({
+          loading: false,
+          data: result.data.task,
+          taskadminIds: result.data.taskadminIds,
+          tstatus: result.data.tstatus,
 
+          pagination,
+          totalItem: result.totalItem
+        });
       }
     });
   },
@@ -176,43 +175,29 @@ var TagIndex = React.createClass({
     this.fetch();
   },
   onSearch(){
-    let _val = $('.search_input').val();
-    let searchtype = this.state.searchtype,
-        searchtext = _val,
-        isrec  = this.state.isrec ,
-        tagid = this.state.tagid,
-        istag = this.state.istag;
+    let taskadminId = this.state.taskadminId,
+        taskstatus  = this.state.taskstatus;
+
     let _parmas = {
-      searchtype: +searchtype,
-      searchtext: searchtext||null,
-      isrec: +isrec,
-      tagid: +tagid,
-      istag: +istag
+      taskadminId: taskadminId,
+      taskstatus: taskstatus,
+      index: 1
     }
+
     this.fetch(_parmas);
   },
   changeHandle(){
     let which = arguments[0],
         val = arguments[1];
     switch(which){
-      case 'search_type':
+      case 'taskadminId':
           this.setState({
-            searchtype: val
+            taskadminId: val
           })
           break;
-      case 'search_channel':
+      case 'taskstatus':
           this.setState({
-            isrec: val
-          })
-          break;
-      case 'tag_type':
-          this.setState({
-            tagid: val
-          })
-          break;
-      case 'has_tag':
-          this.setState({
-            istag: val
+            taskstatus: val
           })
           break;
     }
@@ -322,13 +307,19 @@ var TagIndex = React.createClass({
       }
     }];
 
+    let props = {
+      onSearch: this.onSearch,
+      changeHandle: this.changeHandle,
+      addPublish: this.addPublish,
+      taskadminIds: this.state.taskadminIds,
+      tstatus: this.state.tstatus,
+      taskadminId: this.state.taskadminId,
+      taskstatus: this.state.taskstatus
+    }
+
     return (
       <div className="right-container">
-        <FormSearch
-          onSearch={this.onSearch}
-          changeHandle={this.changeHandle}
-          addPublish={this.addPublish}
-        />
+        <FormSearch {...props}  />
         <Table
           showHeader
           columns={columns}

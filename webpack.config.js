@@ -1,6 +1,7 @@
 var webpack = require('webpack');
 var path = require('path');
 var OpenBrowserPlugin = require('open-browser-webpack-plugin');
+var commonsPlugin = new webpack.optimize.CommonsChunkPlugin('common.js');
 
 module.exports = {
   devServer: {
@@ -26,9 +27,9 @@ module.exports = {
     loaders:[
       { test: /\.css$/, loader: 'style-loader!css-loader' },
       { test: /\.less$/, loader: "style!css!less?outputStyle=expanded" },
-      { 
-        test: /\.js[x]?$/, 
-        exclude: /node_modules/, 
+      {
+        test: /\.js[x]?$/,
+        exclude: /node_modules/,
         loader: 'babel-loader'
       },
       { test: /\.(png|jpg|gif)$/, loader: 'url-loader?limit=8192' }
@@ -39,6 +40,7 @@ module.exports = {
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new OpenBrowserPlugin({ url: 'http://localhost:8003' })
+    new OpenBrowserPlugin({ url: 'http://localhost:8003' }),
+    commonsPlugin
   ]
 };

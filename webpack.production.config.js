@@ -2,6 +2,7 @@ var webpack = require('webpack');
 var path = require('path');
 var uglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
 var CopyWebpackPlugin = require('copy-webpack-plugin');
+var commonsPlugin = new webpack.optimize.CommonsChunkPlugin('common.js');
 
 module.exports = {
   devtool: false,
@@ -35,5 +36,6 @@ module.exports = {
     new CopyWebpackPlugin([
       { from: './app/index.html', to: 'index.html' }
     ]),
+    commonsPlugin
   ]
 };

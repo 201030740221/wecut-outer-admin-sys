@@ -28,20 +28,22 @@ var ViewPage = React.createClass({
     },
     componentDidMount: function () {
       let {params} = this.props;
-      this.getSource(params);
+      console.log(params,'ww');
+      this.getSource({pid:params.id});
     },
     componentWillReceiveProps(nextProps) {
        let {params} = nextProps;
-      this.getSource(params);
+      this.getSource({pid:params.id});
     },
     handleTableChange(pagination) {
+      let self = this;
       const pager = this.state.pagination;
       pager.current = pagination.current;
       this.setState({
         pagination: pager,
       });
 
-      let {params} = this.props;
+      let {params} = self.props;
       let _parmas = {
         pid:params.id,
         index: pagination.current
@@ -53,7 +55,7 @@ var ViewPage = React.createClass({
       let self = this;
       this.setState({ loading: true });
 
-      params = {pid: params.id};
+      params = {pid: params.pid,index: params.index||1};
 
       if(localStorage.getItem('adminId')){
         params.adminId = localStorage.getItem('adminId');

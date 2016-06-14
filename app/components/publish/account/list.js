@@ -5,10 +5,10 @@ const FormItem = Form.Item;
 //import BaseForm from '../../common/base-form';
 import TagsMultSelect from '../../common/tags-mult-select';
 
+
 var FormSearch = React.createClass({
    getInitialState: function () {
         return {
-
 
         };
   },
@@ -32,53 +32,39 @@ var FormSearch = React.createClass({
   },
   render(){
 
+    let taskadminIds = this.props.taskadminIds;
+    var taskadminIds_node = '';
+    if(taskadminIds.length>0){
+      taskadminIds_node = (
+        <Col span="3" style={{marginLeft:'10'}}>
+           <Select
+              defaultValue={this.props.taskadminId+''}
+              onChange={this.handleChange.bind(null,'taskadminId')}
+              style={{width:'120'}}
+           >
+              <Option value='-1'>全部管理</Option>
+              {
+                taskadminIds.map((item,key)=>{
+                  return (
+                    <Option key={key} value={item.accountdminId+''}>{item.name}</Option>
+                  )
+                })
+              }
+            </Select>
+        </Col>
+      )
+    }else{
+      taskadminIds_node = '';
+    }
+
     return (
        <div style={{marginBottom:'20'}}>
           <Row>
-            <Col span="10">
-              <div span="12" className='fl'>
-               <Select
-                  defaultValue="-1"
-                  onChange={this.handleChange.bind(null,'search_type')}
-                  style={{width:'120'}}
-                  >
-                  <Option value="-1">用户昵称</Option>
-                  <Option value="1">频道名</Option>
-                  <Option value="2">频道ID</Option>
-                  <Option value="3">频道主ID</Option>
-                </Select>
-              </div>
-              <div span="12" className='fl'>
-                <Input className="search_input" placeholder="please enter..." style={{marginLeft:'10'}} />
-              </div>
-            </Col>
-            <Col span="3" style={{marginLeft:'10'}}>
-               <Select
-                  defaultValue="-1"
-                  onChange={this.handleChange.bind(null,'search_channel')}
-                  style={{width:'120'}}
-               >
-                  <Option value="-1">全部频道</Option>
-                  <Option value="1">推荐频道</Option>
-                  <Option value="0">非推荐频道</Option>
-                </Select>
-            </Col>
-            <Col span="3" style={{marginLeft:'10'}}>
-               <Select
-                  className="search_channel"
-                  defaultValue="-1"
-                  onChange={this.handleChange.bind(null,'has_tag')}
-                  style={{width:'120'}}
-               >
-                  <Option value="-1">全部标签</Option>
-                  <Option value="1">有标签</Option>
-                  <Option value="0">无标签</Option>
-                </Select>
-            </Col>
+            {taskadminIds_node}
           </Row>
           <Row className="u-mt-20">
             <Col span="12" style={{ textAlign: 'left' }}>
-              <Button type="primary" onClick={this.addPublish}>新增账号</Button>
+                <Button type="primary" onClick={this.addPublish}>新增账号</Button>
             </Col>
             <Col span="12" style={{ textAlign: 'right' }}>
               <Button type="primary" onClick={this.search}>搜索</Button>
@@ -249,10 +235,8 @@ var TagIndex = React.createClass({
           firstLevelTag: [],
           secondLevelTag: [],
 
-          searchtype: -1,
-          isrec: -1,
-          tagid:-1,
-          istag: -1,
+          taskadminIds: [],
+          taskadminId: -1,
 
           record: {},
           visible: false,
@@ -267,18 +251,10 @@ var TagIndex = React.createClass({
       pagination: pager,
     });
 
-    let _val = $('.search_input').val();
-    let searchtype = this.state.searchtype,
-        searchtext = _val,
-        isrec  = this.state.isrec ,
-        tagid = this.state.tagid,
-        istag = this.state.istag;
+    let taskadminId = this.state.taskadminId;
+
     let _parmas = {
-      searchtype: +searchtype,
-      searchtext: searchtext||null,
-      isrec: +isrec,
-      tagid: +tagid,
-      istag: +istag,
+      accountadminId: taskadminId,
       index: pagination.current
     }
 
@@ -304,18 +280,13 @@ var TagIndex = React.createClass({
 
         //let firstLevelTag = result.data.firstLevelTag;
         let _arr = result.data;
-        if(result.data.length>0){
-           self.setState({
-            loading: false,
-            data: result.data,
-            pagination,
-            totalItem: result.totalItem
-          });
-        }else{
-          self.setState({
-            loading: false
-          });
-        }
+         self.setState({
+          loading: false,
+          data: result.data.accounts,
+          taskadminIds: result.data.accountadminIds,
+          pagination,
+          totalItem: result.totalItem
+        });
 
       }
     });
@@ -324,49 +295,27 @@ var TagIndex = React.createClass({
     this.fetch();
   },
   onSearch(){
-    let _val = $('.search_input').val();
-    let searchtype = this.state.searchtype,
-        searchtext = _val,
-        isrec  = this.state.isrec ,
-        tagid = this.state.tagid,
-        istag = this.state.istag;
+    let taskadminId = this.state.taskadminId;
+
     let _parmas = {
-      searchtype: +searchtype,
-      searchtext: searchtext||null,
-      isrec: +isrec,
-      tagid: +tagid,
-      istag: +istag
+      accountadminId: taskadminId,
+      index: 1
     }
+
     this.fetch(_parmas);
   },
   changeHandle(){
     let which = arguments[0],
         val = arguments[1];
     switch(which){
-      case 'search_type':
+      case 'taskadminId':
           this.setState({
-            searchtype: val
-          })
-          break;
-      case 'search_channel':
-          this.setState({
-            isrec: val
-          })
-          break;
-      case 'tag_type':
-          this.setState({
-            tagid: val
-          })
-          break;
-      case 'has_tag':
-          this.setState({
-            istag: val
+            taskadminId: val
           })
           break;
     }
 
   },
-
   tagChange(_key,value){
     let accountList = this.state.accountList;
     accountList.forEach((item,key)=>{
@@ -543,12 +492,18 @@ var TagIndex = React.createClass({
       }
     }];
 
+    let props = {
+      onSearch: this.onSearch,
+      changeHandle: this.changeHandle,
+      addPublish: this.addPublish,
+      taskadminIds: this.state.taskadminIds,
+      taskadminId: this.state.taskadminId,
+    }
+
     return (
       <div className="right-container">
         <FormSearch
-          onSearch={this.onSearch}
-          changeHandle={this.changeHandle}
-          addPublish={this.addPublish}
+          {...props}
         />
         <Table
           showHeader
