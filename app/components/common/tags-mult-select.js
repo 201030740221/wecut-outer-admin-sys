@@ -36,8 +36,13 @@ var TagsSelect = React.createClass({
 
     },
     tagChange(key,value){
+      let _value = [];
+      value.forEach((item)=>{
+        let _sp = item.split(":");
+        _value.push(_sp[1]);
+      })
       if(this.props.tagChange){
-        this.props.tagChange(key,value);
+        this.props.tagChange(key,_value);
       }
 
     },
@@ -50,17 +55,16 @@ var TagsSelect = React.createClass({
       return (
           <div>
             <Select
-               showSearch
-               id="tagid"
-               defaultValue={'二次元'}
-               placeholder=""
+               multiple
+               placeholder="请选择内容标签"
                style={{ width: '100%' }}
+               defaultValue={this.props.defaultValue}
                onChange={self.tagChange.bind(null,key)}
                >
               {
                 tagList.map((_item,_key)=>{
                   return(
-                    <Option value={_item.tagid} key={_key}>{_item.name}</Option>
+                    <Option key={_item.name+":"+_item.tagid}>{_item.name}</Option>
                   )
                 })
               }

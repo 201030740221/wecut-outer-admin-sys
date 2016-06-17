@@ -6,7 +6,7 @@ import {
 const FormItem = Form.Item;
 const Option = Select.Option;
 const createForm = Form.create;
-import TagsSelect from '../../common/tags-select';
+import TagsMultSelect from '../../common/tags-mult-select';
 
 var AccontEdit = React.createClass({
     contextTypes: {
@@ -15,9 +15,9 @@ var AccontEdit = React.createClass({
     getInitialState: function () {
         return {
          data:{},
-         sintro: '',
-         tagid: '',
-         fileList: []
+         tagids: [],
+         fileList: [],
+         loading: true
         };
     },
     componentDidMount: function () {
@@ -45,6 +45,7 @@ var AccontEdit = React.createClass({
           if(res.code){
             self.setState({
               data: res.data,
+              loading: false,
               fileList: [
                 {
                    uid: -1,
@@ -114,10 +115,25 @@ var AccontEdit = React.createClass({
       let fileList = this.state.fileList;
       let data = this.state.data;
 
+      let _tagids = [];
+      data.tagnames = data.tagnames||[];
+      data.tagnames.forEach((item)=>{
+        let _sp = item.split(":");
+        _tagids.push(_sp[1]);
+      })
+      console.log(_tagids);
+
+      let _arr = this.state.tagids;
+      let real_tag = _arr;
+      if(_arr.length<=0){
+        real_tag = _tagids;
+      }
+
       _parmas.user = [{
+        uname: data.uname,
         avatar: fileList[0].url||data.avatar,
-        sintro: this.state.sintro||data.sintro,
-        tagid: this.state.tagid||data.tagid
+        sintro: data.sintro,
+        tagids: real_tag
       }];
 
       reqwest({
@@ -139,25 +155,31 @@ var AccontEdit = React.createClass({
       });
     },
     onChangeHandle(name,e){
+      let data = this.state.data;
+      data[name] = e.target.value;
+
       this.setState({
-        sintro: e.target.value
+        data: data
       })
+
     },
-    tagChange(value){
-      console.log(value);
+    tagChange(key,value){
+      console.log(key,value);
       this.setState({
-        tagid: value
+        tagids: value
       })
-      if(this.props.tagChange){
-        this.props.tagChange(value);
-      }
     },
 
     render(){
 
+      if(this.state.loading){
+        return (
+          <Icon type="loading" />
+        )
+      }
+
       let self = this;
       let data = this.state.data;
-      let sintro = this.state.sintro;
 
       let formItemLayout = {
         labelCol: { span: 5 },
@@ -185,11 +207,20 @@ var AccontEdit = React.createClass({
               <h3 className="panel-heading u-mb-20">基本信息</h3>
               <FormItem
                 {...formItemLayout}
+                label="用户昵称：">
+                <Input
+                  value={data.uname}
+                  type="text"
+                  rows="4"
+                  onChange={this.onChangeHandle.bind(null,'uname')}
+                  />
+              </FormItem>
+              <FormItem
+                {...formItemLayout}
                 label="用户简介：">
                 <Input
-                  value={sintro||data.sintro}
+                  value={data.sintro}
                   type="textarea"
-                  id="topic"
                   rows="4"
                   onChange={this.onChangeHandle.bind(null,'sintro')}
                   />
@@ -197,7 +228,7 @@ var AccontEdit = React.createClass({
               <FormItem
                 {...formItemLayout}
                 label="标签：">
-                <TagsSelect defaultValue={this.state.tagid||data.tagid} tagChange={self.tagChange} />
+                 <TagsMultSelect defaultValue={data.tagnames} log={''} tagChange={self.tagChange} />
               </FormItem>
 
                <FormItem

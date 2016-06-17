@@ -68,7 +68,7 @@ var FormSearch = React.createClass({
               {
                 tstatus.map((item,key)=>{
                   return (
-                    <Option key={key} value={item.taskstatus+""}>{item.status}</Option>
+                    <Option key={key} value={item.taskstatus+''}>{item.status}</Option>
                   )
                 })
               }
@@ -87,11 +87,12 @@ var FormSearch = React.createClass({
           </Row>
           <Row className="u-mt-20">
             <Col span="12" style={{ textAlign: 'left' }}>
-                <Button type="primary" onClick={this.addPublish}>新增发布</Button>
-            </Col>
-            <Col span="12" style={{ textAlign: 'right' }}>
               <Button type="primary" onClick={this.search}>搜索</Button>
             </Col>
+            <Col span="12" style={{ textAlign: 'right' }}>
+                <Button type="primary" onClick={this.addPublish}>新增发布</Button>
+            </Col>
+
           </Row>
         </div>
       )
@@ -179,7 +180,7 @@ var TagIndex = React.createClass({
         taskstatus  = this.state.taskstatus;
 
     let _parmas = {
-      taskadminId: taskadminId,
+      taskadminId: +taskadminId,
       taskstatus: taskstatus,
       index: 1
     }
@@ -300,7 +301,7 @@ var TagIndex = React.createClass({
         }
         return (
             <span>
-              <a href="javascript:;" onClick={self.edit.bind(null,record.pid,'view')}>查看详情</a>
+              <a href={'#/publish/content/view/'+record.pid} target="_blank">查看详情</a>
               {end_node}
             </span>
           )

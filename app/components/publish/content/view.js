@@ -2,6 +2,8 @@ import {Router, Route, IndexRoute, useRouterHistory} from 'react-router';
 import { Popconfirm,Popover,message,Icon,Table,Form, Select,Input, Row, Col, Modal, Button,Tag } from 'antd';
 const FormItem = Form.Item;
 
+import TagsMultSelect from '../../common/tags-mult-select';
+
 //缩略图
 const TuleImageBox = React.createClass({
   render(){
@@ -24,6 +26,9 @@ var ViewPage = React.createClass({
           loading: false,
           pagination: { pageSize:20,total:20},
           totalItem: 20,
+          tagids:[],
+          record: {},
+          visible: false,
         };
     },
     componentDidMount: function () {
@@ -113,6 +118,83 @@ var ViewPage = React.createClass({
         }
       });
     },
+
+    // 弹出框
+    showModal(record) {
+      this.setState({
+        visible: true,
+        record: record
+      });
+    },
+    handleOk() {
+
+      let {params} = this.props;
+      let self = this;
+      let record = this.state.record;
+
+      let _tagids = [];
+      record.existTags = record.existTags||[];
+      record.existTags.forEach((item)=>{
+        let _sp = item.split(":");
+        _tagids.push(_sp[1]);
+      })
+      let _arr = this.state.tagids;
+      let real_tag = _arr;
+
+      if(_arr.length<=0&&_tagids.length<=0){
+        message.error('你还没选择标签哦');
+        return;
+      }
+      if(_arr.length<=0){
+        real_tag = _tagids;
+      }
+      let _parmas={};
+      _parmas.tid = record.tid;
+      _parmas.tule = [{
+        tagids:real_tag
+      }];
+      if(localStorage.getItem('adminId')){
+        _parmas.adminId = localStorage.getItem('adminId');
+      }
+      reqwest({
+        url: apiConfig.apiHost+'/cms/publish/tule.php',
+        method: 'post',
+        data: _parmas,
+        type: 'json',
+        success: (result) => {
+          if(result.code){
+
+              message.success('编辑成功');
+
+              self.setState({
+                visible: false,
+                confirmLoading: false
+              });
+              self.getSource({pid:params.id});
+
+          }else{
+             message.error(result.msg);
+             self.setState({
+                confirmLoading: false
+              });
+          }
+
+        }
+      });
+
+    },
+    handleCancel() {
+      console.log('点击了取消');
+      this.setState({
+        visible: false
+      });
+    },
+    tagChange(key,value){
+      console.log(value);
+      this.setState({
+        tagids: value
+      })
+    },
     render(){
 
       let self = this;
@@ -154,19 +236,34 @@ var ViewPage = React.createClass({
         title: '管理',
         dataIndex: '',
         render(text,record){
-          let hide_node = '';
+          let hide_node = '' , edit_node='';
           if(+record.isDel==1){
             hide_node = (
                 <a href="javascript:;" onClick={self.hideHandle.bind(null,record.id,record.tid)}>屏蔽</a>
               );
           }
+          if(+record.isSuperAdmin==1){
+            edit_node = (
+                <a href="javascript:;" onClick={self.showModal.bind(null,record)}>编辑</a>
+              );
+          }
           return (
               <span>
                 {hide_node}
+                <span className="ant-divider"></span>
+                {edit_node}
               </span>
             )
         }
       }];
+
+      let formItemLayout = {
+          labelCol: { span: 6 },
+          wrapperCol: { span: 14 },
+        };
+
+      let record = this.state.record;
+      record.existTags = record.existTags||[];
 
       return (
           <div>
@@ -180,7 +277,26 @@ var ViewPage = React.createClass({
               bordered
               rowKey={record => record.id}
               />
-              <span className="total_show">共 {this.state.totalItem} 条记录</span>
+              <span className="total_show">
+                共 {this.state.totalItem} 条记录，
+                等待中xx条，发布成功xx条，发布失败xx条，重新发布xx条
+              </span>
+
+              <Modal title="编辑标签"
+               visible={this.state.visible}
+               onOk={this.handleOk}
+               confirmLoading={this.state.confirmLoading}
+               onCancel={this.handleCancel}>
+               <div style={{maxHeight: '450',overflow:'auto'}}>
+                <Form horizontal>
+                   <FormItem
+                     {...formItemLayout}
+                     label="标签：">
+                     <TagsMultSelect defaultValue={record.existTags} log={''} tagChange={self.tagChange} />
+                   </FormItem>
+                 </Form>
+               </div>
+             </Modal>
           </div>
         )
     }

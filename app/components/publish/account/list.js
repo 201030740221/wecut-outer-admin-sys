@@ -64,11 +64,12 @@ var FormSearch = React.createClass({
           </Row>
           <Row className="u-mt-20">
             <Col span="12" style={{ textAlign: 'left' }}>
-                <Button type="primary" onClick={this.addPublish}>新增账号</Button>
-            </Col>
-            <Col span="12" style={{ textAlign: 'right' }}>
               <Button type="primary" onClick={this.search}>搜索</Button>
             </Col>
+            <Col span="12" style={{ textAlign: 'right' }}>
+                <Button type="primary" onClick={this.addPublish}>新增账号</Button>
+            </Col>
+
           </Row>
         </div>
       )
@@ -199,7 +200,7 @@ var Uploader = React.createClass({
                      <FormItem
                        {...formItemLayout}
                        label="标签：">
-                       <TagsMultSelect log={log} tagChange={self.tagChange} />
+                       <TagsMultSelect defaultValue={[]} log={log} tagChange={self.tagChange} />
                      </FormItem>
                     </Form>
                   </Col>
@@ -317,15 +318,19 @@ var TagIndex = React.createClass({
 
   },
   tagChange(_key,value){
+    console.log(_key,value,'tag');
     let accountList = this.state.accountList;
+    let _tagids = [];
+
     accountList.forEach((item,key)=>{
       if(_key==key){
-        item.tagid = value
+        item.tagids = value
       }
-    })
+    });
     this.setState({
       accountList: accountList
     })
+
   },
 
   // 弹出框
@@ -368,7 +373,7 @@ var TagIndex = React.createClass({
         avatar: _item.url,
         uname: _item.uname,
         sintro: _item.sintro,
-        tagid: _item.tagid||1
+        tagids: _item.tagids
       });
     })
 
@@ -465,6 +470,17 @@ var TagIndex = React.createClass({
       title: '昵称',
       dataIndex: 'uname'
     },{
+      title: '头像',
+      dataIndex: '',
+      render(text,record){
+        return(
+          <img src={record.uavatar} width='60' />
+        )
+      }
+    },{
+      title: '简介',
+      dataIndex: 'sintro'
+    },{
       title: '内容数',
       dataIndex: 'worksNum'
     },{
@@ -517,7 +533,7 @@ var TagIndex = React.createClass({
           />
           <span className="total_show">共 {this.state.totalItem} 条记录</span>
 
-           <Modal title="新增账号"
+           <Modal title="新增账号  （tips:可以批量选择，建议最多同时选择10张）"
             visible={this.state.visible}
             onOk={this.handleOk}
             confirmLoading={this.state.confirmLoading}

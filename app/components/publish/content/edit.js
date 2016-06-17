@@ -471,7 +471,6 @@ var Index = React.createClass({
         console.log(_sp[1],'tagid');
         _tagids.push(_sp[1]);
       })
-      _tagids.push();
 
       let _parmas = {
         topic: $('#topic').val()||'',
@@ -506,7 +505,6 @@ var Index = React.createClass({
     render: function () {
 
     	let self = this;
-
       return (
           <TheForm
             channels={this.state.channels}
